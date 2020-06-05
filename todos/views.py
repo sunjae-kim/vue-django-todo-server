@@ -8,7 +8,14 @@ from .models import Todo
 @api_view(['GET', 'POST'])
 def create_readlist(request):
     if request.method == 'GET':
-        todos = Todo.objects.order_by('-pk')
+        todos = Todo.objects.all()
+        if request.GET.get('is-completed'):
+            is_completed = bool(int(request.GET.get('is-completed')))
+            todos = todos.filter(is_completed=is_completed)
+        if request.GET.get('page'):
+            page = int(request.GET.get('page'))
+            limit = int(request.GET.get('limit', 5))
+            todos = todos[(page-1)*limit:page*limit]
         serializer = TodoSerializer(todos, many=True)
     if request.method == 'POST':
         serializer = TodoSerializer(data=request.data)
